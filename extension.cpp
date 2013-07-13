@@ -78,6 +78,8 @@ const sp_nativeinfo_t g_MyNatives[] = {
 	{NULL,	NULL},
 };
 
+ConVar sendproxy_autoupdate( "sendproxy_autoupdate", "0", FCVAR_NONE, "Enable or disable automatic gamedata updating for the sendproxy extension." );
+
 
 void Hook_UpdateOnRemove()
 {
@@ -227,6 +229,9 @@ bool SendProxyManager::SDK_OnLoad(char *error, size_t maxlength, bool late)
 
 void TryUpdate()
 {
+	if ( !sendproxy_autoupdate.GetBool() )
+		return; // auto update disabled
+
 	IWebTransfer *transfer = webternet->CreateSession();
 	Downloader downloader = Downloader();
 	if (!transfer->Download("http://gamedata.afronanny.org/sendproxy.txt", &downloader, NULL))
