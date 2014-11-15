@@ -1,0 +1,33 @@
+"Games"
+{
+	"csgo"
+	{
+		"Offsets"
+		{
+			"UpdateOnRemove"
+			{
+				"windows"	"109"
+				"linux"		"110"
+			}
+		}
+	}
+
+	"#default"
+	{
+		"#supported"
+		{
+			"game"		"dod"
+			"game"		"hl2mp"
+			"game"		"cstrike"
+			"game"		"tf"
+		}
+		"Offsets"
+		{
+			"UpdateOnRemove"
+			{
+				"windows"	"105"
+				"linux"		"106"
+			}
+		}
+	}
+}
