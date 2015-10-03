@@ -12,5 +12,9 @@
 *.la
 *.a
 
+# User files
+*.suo
+*.user
+
 Debug*/
 Release*/
