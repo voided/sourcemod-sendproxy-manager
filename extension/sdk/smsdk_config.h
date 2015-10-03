@@ -40,7 +40,7 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"SendProxy Manager"
 #define SMEXT_CONF_DESCRIPTION	"Change stuff without actually changing stuff!"
-#define SMEXT_CONF_VERSION		"1.1.4"
+#define SMEXT_CONF_VERSION		"1.1.5"
 #define SMEXT_CONF_AUTHOR		"Afronanny"
 #define SMEXT_CONF_URL			"http://www.afronanny.org/"
 #define SMEXT_CONF_LOGTAG		"SENDPROXY"
