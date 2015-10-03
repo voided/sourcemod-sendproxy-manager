@@ -815,12 +815,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\extension.cpp" />
-    <ClCompile Include="..\gamedataupdater.cpp" />
     <ClCompile Include="..\sdk\smsdk_ext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extension.h" />
-    <ClInclude Include="..\gamedataupdater.h" />
     <ClInclude Include="..\sdk\smsdk_config.h" />
     <ClInclude Include="..\sdk\smsdk_ext.h" />
   </ItemGroup>

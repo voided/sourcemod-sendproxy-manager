@@ -32,12 +32,8 @@
 #undef GetProp
 #endif
 #include "extension.h"
-#include "extensions/IWebternet.h"
-#include "gamedataupdater.h"
 
-IWebternet *webternet = NULL;
-void TryUpdate();
-bool g_bDoLateUpdate = false;
+
 /**
  * @file extension.cpp
  * @brief Implement extension code here.
@@ -77,8 +73,6 @@ const sp_nativeinfo_t g_MyNatives[] = {
 	{"SendProxy_UnhookPropChange", Native_UnhookPropChange},
 	{NULL,	NULL},
 };
-
-ConVar sendproxy_autoupdate( "sendproxy_autoupdate", "0", FCVAR_NONE, "Enable or disable automatic gamedata updating for the sendproxy extension." );
 
 
 void Hook_UpdateOnRemove()
@@ -194,15 +188,6 @@ void Hook_GameFrame(bool simulating)
 }
 bool SendProxyManager::SDK_OnLoad(char *error, size_t maxlength, bool late)
 {
-	SM_GET_LATE_IFACE(WEBTERNET, webternet);
-	if (!webternet)
-	{
-		g_bDoLateUpdate = true;
-		g_pSM->LogMessage(myself, "Could not get Webternet iface yet - skipping pre-load gamedata update check and trying later");
-	} else {
-		TryUpdate();
-	}
-
 	char conf_error[255];
 	if (!gameconfs->LoadGameConfigFile("sendproxy", &g_pGameConf, conf_error, sizeof(conf_error)))
 	{
@@ -227,55 +212,10 @@ bool SendProxyManager::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	return true;
 }
 
-void TryUpdate()
-{
-	if ( !sendproxy_autoupdate.GetBool() )
-		return; // auto update disabled
-
-	IWebTransfer *transfer = webternet->CreateSession();
-	Downloader downloader = Downloader();
-	if (!transfer->Download("http://gamedata.afronanny.org/sendproxy.txt", &downloader, NULL))
-	{
-		g_pSM->LogMessage(myself, "Error downloading sendproxy.txt: %s", transfer->LastErrorMessage());
-		delete transfer;
-		return;
-	}
-	std::string str(downloader.buffer);
-	size_t found = str.find("404");
-	if (found != std::string::npos)
-	{
-		g_pSM->LogMessage(myself, "Gamedata not found on server! 404");
-		delete transfer;
-		return;
-	}
-	char path[PLATFORM_MAX_PATH];
-	g_pSM->BuildPath(Path_SM, path, sizeof(path), "gamedata/sendproxy.txt");
-	FILE *fp = fopen(path, "w");
-	if (!fp)
-	{
-		g_pSM->LogMessage(myself, "Could not open sendproxy.txt for updating");
-		delete transfer;
-		return;
-	}
-	fwrite(downloader.buffer, 1, downloader.pos, fp);
-	fclose(fp);
-	g_bDoLateUpdate = false;
-	delete transfer;
-}
 
 void SendProxyManager::SDK_OnAllLoaded()
 {
 	sharesys->AddNatives(myself, g_MyNatives);
-	if (g_bDoLateUpdate && !webternet)
-	{
-		SM_GET_LATE_IFACE(WEBTERNET, webternet);
-		if (!webternet)
-		{
-			g_pSM->LogMessage(myself, "Still can't get Webternet interface, skipping gamedata download");
-			return;
-		}
-		TryUpdate();
-	}
 }
 
 void SendProxyManager::SDK_OnUnload()
