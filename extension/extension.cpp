@@ -100,13 +100,13 @@ void Hook_ClientDisconnect(edict_t* pEnt)
 {
 	for (int i = 0; i < g_Hooks.Count(); i++)
 	{
-		if (g_Hooks[i].objectID == engine->IndexOfEdict(pEnt))
+		if (g_Hooks[i].objectID == gamehelpers->IndexOfEdict(pEnt))
 			g_SendProxyManager.UnhookProxy(i);
 	}
 
 	for (int i = 0; i < g_ChangeHooks.Count(); i++)
 	{
-		if (g_ChangeHooks[i].objectID == engine->IndexOfEdict(pEnt))
+		if (g_ChangeHooks[i].objectID == gamehelpers->IndexOfEdict(pEnt))
 			g_ChangeHooks.Remove(i--);
 	}
 	RETURN_META(MRES_IGNORED);
@@ -122,7 +122,7 @@ void Hook_GameFrame(bool simulating)
 			{
 			case Prop_Int:
 				{
-					edict_t* pEnt = engine->PEntityOfEntIndex(g_ChangeHooks[i].objectID);
+					edict_t* pEnt = gamehelpers->EdictOfIndex(g_ChangeHooks[i].objectID);
 					CBaseEntity* pEntity = gameents->EdictToBaseEntity(pEnt);
 					int iCurrent = *(int*)((unsigned char*)pEntity + g_ChangeHooks[i].Offset);
 					if (iCurrent != g_ChangeHooks[i].iLastValue)
@@ -142,7 +142,7 @@ void Hook_GameFrame(bool simulating)
 				}
 			case Prop_Float:
 				{
-					edict_t* pEnt = engine->PEntityOfEntIndex(g_ChangeHooks[i].objectID);
+					edict_t* pEnt = gamehelpers->EdictOfIndex(g_ChangeHooks[i].objectID);
 					CBaseEntity* pEntity = gameents->EdictToBaseEntity(pEnt);
 					float flCurrent = *(float*)((unsigned char*)pEntity + g_ChangeHooks[i].Offset);
 					if (flCurrent != g_ChangeHooks[i].flLastValue)
@@ -162,7 +162,7 @@ void Hook_GameFrame(bool simulating)
 				}
 			case Prop_String:
 				{
-					edict_t* pEnt = engine->PEntityOfEntIndex(g_ChangeHooks[i].objectID);
+					edict_t* pEnt = gamehelpers->EdictOfIndex(g_ChangeHooks[i].objectID);
 					CBaseEntity* pEntity = gameents->EdictToBaseEntity(pEnt);
 					const char* szCurrent = (const char*)((unsigned char*)pEntity + g_ChangeHooks[i].Offset);
 					if (strcmp(szCurrent, g_ChangeHooks[i].szLastValue.c_str()) != 0)
@@ -273,7 +273,7 @@ bool SendProxyManager::AddHookToList(SendPropHook hook)
 
 bool SendProxyManager::HookProxy(SendProp* pProp, int objectID, IPluginFunction *pCallback)
 {
-	edict_t* pEdict = engine->PEntityOfEntIndex(objectID);
+	edict_t* pEdict = gamehelpers->EdictOfIndex(objectID);
 	if (!pEdict || pEdict->IsFree())
 		return false;
 
@@ -403,7 +403,7 @@ bool CallVector(SendPropHook hook, Vector &vec)
 
 void GlobalProxy(const SendProp *pProp, const void *pStructBase, const void* pData, DVariant *pOut, int iElement, int objectID)
 {
-	edict_t* pEnt = engine->PEntityOfEntIndex(objectID);
+	edict_t* pEnt = gamehelpers->EdictOfIndex(objectID);
 	for (int i = 0; i < g_Hooks.Count(); i++)
 	{
 		if (g_Hooks[i].objectID == objectID && g_Hooks[i].pVar == pProp && pEnt == g_Hooks[i].pEnt)
@@ -492,7 +492,7 @@ static cell_t Native_UnhookPropChange(IPluginContext* pContext, const cell_t* pa
 	}
 	int entity = params[1];
 	char* name;
-	edict_t* pEnt = engine->PEntityOfEntIndex(entity);
+	edict_t* pEnt = gamehelpers->EdictOfIndex(entity);
 	pContext->LocalToString(params[2], &name);
 	IPluginFunction *callback = pContext->GetFunctionById(params[3]);
 	sm_sendprop_info_t info;
@@ -515,7 +515,7 @@ static cell_t Native_HookPropChange(IPluginContext* pContext, const cell_t* para
 	}
 	int entity = params[1];
 	char* name;
-	edict_t* pEnt = engine->PEntityOfEntIndex(entity);
+	edict_t* pEnt = gamehelpers->EdictOfIndex(entity);
 	pContext->LocalToString(params[2], &name);
 	IPluginFunction *callback = pContext->GetFunctionById(params[3]);
 	SendProp *pProp = NULL;
@@ -555,7 +555,7 @@ static cell_t Native_Hook(IPluginContext* pContext, const cell_t* params)
 	int entity = params[1];
 	char* name;
 	pContext->LocalToString(params[2], &name);
-	edict_t* pEnt = engine->PEntityOfEntIndex(entity);
+	edict_t* pEnt = gamehelpers->EdictOfIndex(entity);
 	int propType = params[3];
 	IPluginFunction *callback = pContext->GetFunctionById(params[4]);
 	SendProp *pProp = NULL;
@@ -654,7 +654,7 @@ static cell_t Native_HookArrayProp(IPluginContext* pContext, const cell_t* param
 	int propType = params[4];
 	IPluginFunction *callback = pContext->GetFunctionById(params[5]);
 	
-	edict_t* pEnt = engine->PEntityOfEntIndex(entity);
+	edict_t* pEnt = gamehelpers->EdictOfIndex(entity);
 	ServerClass *sc = pEnt->GetNetworkable()->GetServerClass();
 	sm_sendprop_info_t info;
 	gamehelpers->FindSendPropInfo(sc->GetName(), propName, &info);
